@@ -118,7 +118,7 @@ export default {
      * @return {string} element XML type
      */
     getXmlType( control ) {
-        return control.dataset.typeXml;
+        return control.dataset.typeXml || 'string';
     },
     /**
      * @param {Element} control
@@ -183,6 +183,14 @@ export default {
                     }
                     break;
                 }
+            case 'datetime-local':
+                {
+                    if ( control.value ) {
+                        // Add local timezone offset if offset is missing
+                        value = new Date( control.value ).toISOLocalString();
+                    }
+                    break;
+                }
             default:
                 {
                     value = control.value;
@@ -214,6 +222,7 @@ export default {
     setVal( control, value, event = events.InputUpdate() ) {
         let inputs;
         const type = this.getInputType( control );
+        const xmlType = this.getXmlType( control );
         const question = this.getWrapNode( control );
         const name = this.getName( control );
 
@@ -234,10 +243,20 @@ export default {
                 }
             }
 
-            if ( type === 'date' || type === 'datetime' ) {
-                // convert current value (loaded from instance) to a value that a native datepicker understands
-                // TODO: test for IE, FF, Safari when those browsers start including native datepickers
-                value = types[ type ].convert( value );
+            if ( xmlType.toLowerCase() === 'date' || xmlType.toLowerCase() === 'datetime' ) {
+                if ( value ) {
+                    // convert current value (loaded from instance) to a value that a native datepicker understands
+                    // TODO: test for IE, FF, Safari when those browsers start including native datepickers
+                    value = types[ xmlType.toLowerCase() ].convert( value );
+
+                    if ( xmlType.toLowerCase() === 'datetime' ) {
+                        // convert to local time zone
+                        value = new Date( value ).toISOLocalString();
+                        // chop off local timezone offset to display properly in (native datetime-local) widget
+                        const parts = value.split( 'T' );
+                        value = `${parts[0]}T${parts[1].split(/[Z\-+]/)[0]}`;
+                    }
+                }
             }
 
             if ( type === 'time' ) {
