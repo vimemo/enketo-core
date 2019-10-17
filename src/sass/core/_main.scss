@@ -490,13 +490,13 @@ select {
     &[type=password],
     &[type=url],
     &[type=email],
-    &[type=datetime-local],
     &[type=file] {
         width: $input-max-width;
     }
 
     &[type=date],
     &[type=month],
+    &[type=datetime-local],
     &[type=number],
     &[type=time],
     &[type=text].mask-date {
