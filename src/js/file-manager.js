@@ -55,7 +55,15 @@ fileManager.getFileUrl = subject => {
             resolve( null );
         } else if ( typeof subject === 'string' ) {
             // TODO obtain from storage as http URL or objectURL
-            reject( 'no!' );
+            // or from model for default binary files
+
+            // Very crude URL checker which is fine for now,
+            // because at this point we don't expect anything other than jr://
+            if ( /^[a-zA-Z]+:\/\//.test( subject ) ) {
+                resolve( subject );
+            } else {
+                reject( 'no!' );
+            }
         } else if ( typeof subject === 'object' ) {
             if ( fileManager.isTooLarge( subject ) ) {
                 error = new Error( t( 'filepicker.toolargeerror', { maxSize: fileManager.getMaxSizeReadable() } ) );
